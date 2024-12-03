@@ -1,0 +1,86 @@
+@page "/eliminar-tareas"
+@inject NavigationManager Navigation
+
+<PageTitle>Eliminar tareas</PageTitle>
+
+
+@if (tasks.Any())
+{
+    <div class="task-list">
+        @foreach (var task in tasks)
+        {
+            <div class="task">
+                <h5>@task.Title</h5>
+                <p>@task.Description</p>
+                <p><strong>Fecha límite:</strong> @task.DueDate.ToShortDateString()</p>
+                <p><strong>Prioridad:</strong> @task.Priority</p>
+                <button class="btn btn-danger" @onclick="() => ConfirmDeleteTask(task)">Eliminar</button>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">No hay tareas para mostrar.</p>
+    <button class="btn btn-primary" @onclick="NavigateToAddTask">Agregar tarea</button>
+}
+
+<button class="btn btn-secondary mt-3" @onclick="NavigateBack">Volver</button>
+
+@if (isConfirmDeleteVisible)
+{
+    <div class="confirmation-modal">
+        <div class="confirmation-content">
+            <p>¿Estás seguro de que deseas eliminar esta tarea?</p>
+            <button class="btn btn-success" @onclick="() => DeleteTask(taskToDelete)">Sí</button>
+            <button class="btn btn-danger" @onclick="CancelDelete">No</button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<TaskModel> tasks = new List<TaskModel>(); // Inicialmente vacío
+    private bool isConfirmDeleteVisible = false; // Controla la visibilidad del cuadro de confirmación
+    private TaskModel taskToDelete; // La tarea seleccionada para eliminar
+
+    protected override void OnInitialized()
+    {
+        // Inicialización adicional si es necesaria
+    }
+
+    private void ConfirmDeleteTask(TaskModel task)
+    {
+        taskToDelete = task;
+        isConfirmDeleteVisible = true; // Muestra el cuadro de confirmación
+    }
+
+    private void DeleteTask(TaskModel task)
+    {
+        tasks.Remove(task);
+        isConfirmDeleteVisible = false; // Cierra el cuadro de confirmación
+    }
+
+    private void CancelDelete()
+    {
+        isConfirmDeleteVisible = false; // Cierra el cuadro de confirmación sin eliminar
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/tareas");
+    }
+
+    private void NavigateToAddTask()
+    {
+        Navigation.NavigateTo("/agregar-tarea");
+    }
+
+    public class TaskModel
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString(); // Generar un ID único
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime DueDate { get; set; }
+        public string Priority { get; set; }
+    }
+}
