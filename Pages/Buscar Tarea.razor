@@ -1,0 +1,35 @@
+@page "/buscar-tareas"
+@inject NavigationManager Navigation
+
+<PageTitle>Buscar tareas</PageTitle>
+
+<InputText @bind-Value="searchTerm" class="form-control" placeholder="Buscar tarea..." />
+
+<div class="task-list">
+    @foreach (var task in tasks.Where(t => t.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+    {
+        <div class="task">
+            <h5>@task.Title</h5>
+            <p>@task.Description</p>
+            <p><strong>Fecha límite:</strong> @task.DueDate.ToShortDateString()</p>
+            <p><strong>Prioridad:</strong> @task.Priority</p>
+        </div>
+    }
+</div>
+
+@code {
+    private string searchTerm = string.Empty;
+    private List<TaskModel> tasks = new List<TaskModel>
+    {
+        new TaskModel { Title = "Estudiar Blazor", Description = "Aprender Blazor WebAssembly", DueDate = DateTime.Now.AddDays(3), Priority = "Alta" },
+        new TaskModel { Title = "Comprar comida", Description = "Ir al supermercado", DueDate = DateTime.Now.AddDays(1), Priority = "Media" }
+    };
+
+    public class TaskModel
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime DueDate { get; set; }
+        public string Priority { get; set; }
+    }
+}
