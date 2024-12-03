@@ -1,7 +1,74 @@
-﻿@page "/"
+@page "/"
+@using System.Security.Cryptography
+@using System.Text
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
 
-<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<PageTitle>Login</PageTitle>
 
-Welcome to your new app.
+<div class="login-container">
+    <h3>@(isLogin ? "Iniciar sesión" : "Registrar cuenta")</h3>
+
+    <EditForm Model="@user" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="email">Correo Electrónico:</label>
+            <InputText id="email" class="form-control" @bind-value="user.Email" />
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña:</label>
+            <InputText id="password" class="form-control" @bind-value="user.Password" />
+        </div>
+        <button type="submit" class="btn btn-primary">@((isLogin ? "Iniciar sesión" : "Registrar cuenta"))</button>
+    </EditForm>
+
+    <button @onclick="ToggleAuthMode" class="btn btn-link">
+        @(isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión")
+    </button>
+</div>
+
+@code {
+    private bool isLogin = true;
+    private User user = new User();
+    private string errorMessage = "";
+
+    private void HandleSubmit()
+    {
+        if (isLogin)
+        {
+            // Lógica de inicio de sesión (simulada con el código de abajo)
+            if (user.Email == "usuario@dominio.com" && user.Password == "contraseña123")
+            {
+                Navigation.NavigateTo("/tareas");
+            }
+            else
+            {
+                errorMessage = "Credenciales incorrectas";
+            }
+        }
+        else
+        {
+            // Lógica de registro (simulada)
+            Navigation.NavigateTo("/tareas");
+        }
+    }
+
+    private void ToggleAuthMode()
+    {
+        isLogin = !isLogin;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        
+    }
+
+    public class User
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+}
