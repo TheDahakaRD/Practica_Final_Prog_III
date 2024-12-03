@@ -1,0 +1,149 @@
+@page "/tareas"
+@using System.Linq
+@using Blazored.LocalStorage
+@inject NavigationManager Navigation
+@using System.Text.Json
+@inject ILocalStorageService LocalStorage
+
+<PageTitle>Tareas</PageTitle>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div>
+    <button class="btn btn-success" @onclick="NavigateToAddTask">Agregar tarea</button>
+    <button class="btn btn-info" @onclick="NavigateToSearchTask">Buscar tarea</button>
+</div>
+
+<div class="task-list">
+    @foreach (var task in tasks)
+    {
+        <div class="task">
+            <h5>@task.Title</h5>
+            <p>@task.Description</p>
+            <p><strong>Fecha límite:</strong> @task.DueDate.ToShortDateString()</p>
+            <p><strong>Prioridad:</strong> @task.Priority</p>
+            <button @onclick="() => EditTask(task)">Editar</button>
+            <button @onclick="() => DeleteTask(task)">Eliminar</button>
+        </div>
+    }
+</div>
+
+@code {
+    private string errorMessage = "";
+    private List<TaskModel> tasks = new List<TaskModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Intentar cargar las tareas desde localStorage
+            var serializedTasks = await LocalStorage.GetItemAsync<string>("tasks");
+
+            // Si no hay tareas guardadas, agregar las tareas de ejemplo
+            if (string.IsNullOrEmpty(serializedTasks))
+            {
+                tasks = new List<TaskModel>
+                {
+                    new TaskModel
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "Comprar víveres",
+                        Description = "Ir al supermercado a comprar víveres para la semana.",
+                        DueDate = DateTime.Now.AddDays(2),  // Fecha límite dentro de 2 días
+                        Priority = "Alta"
+                    },
+                    new TaskModel
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "Reunión con el equipo",
+                        Description = "Reunión para revisar el progreso del proyecto.",
+                        DueDate = DateTime.Now.AddDays(1),  // Fecha límite dentro de 1 día
+                        Priority = "Media"
+                    },
+                    new TaskModel
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "Llamar a los clientes",
+                        Description = "Hacer llamadas a los clientes para obtener retroalimentación sobre el producto.",
+                        DueDate = DateTime.Now.AddDays(3),  // Fecha límite dentro de 3 días
+                        Priority = "Baja"
+                    },
+                    new TaskModel
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "Reparar computadora",
+                        Description = "Reparar la computadora que no enciende.",
+                        DueDate = DateTime.Now.AddDays(4),  // Fecha límite dentro de 4 días
+                        Priority = "Alta"
+                    },
+                    new TaskModel
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "Enviar informe mensual",
+                        Description = "Preparar y enviar el informe mensual de desempeño.",
+                        DueDate = DateTime.Now.AddDays(5),  // Fecha límite dentro de 5 días
+                        Priority = "Alta"
+                    }
+                };
+
+                // Guardar las tareas en localStorage
+                await LocalStorage.SetItemAsync("tasks", JsonSerializer.Serialize(tasks));
+            }
+            else
+            {
+                // Si ya hay tareas guardadas, deserializarlas
+                tasks = JsonSerializer.Deserialize<List<TaskModel>>(serializedTasks);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading tasks: {ex.Message}";
+        }
+    }
+
+    private void NavigateToAddTask()
+    {
+        Navigation.NavigateTo("/agregar-tarea");
+    }
+
+    private void NavigateToSearchTask()
+    {
+        Navigation.NavigateTo("/buscar-tareas");
+    }
+
+    private void EditTask(TaskModel task)
+    {
+        Navigation.NavigateTo($"/editar-tarea/{task.Id}");
+    }
+
+    private async Task DeleteTask(TaskModel task)
+    {
+        tasks.Remove(task);
+        await SaveTasks();
+    }
+
+    private async Task SaveTasks()
+    {
+        try
+        {
+            var serializedTasks = JsonSerializer.Serialize(tasks);
+            await LocalStorage.SetItemAsync("tasks", serializedTasks);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving tasks: {ex.Message}";
+        }
+    }
+
+    public class TaskModel
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime DueDate { get; set; }
+        public string Priority { get; set; }
+    }
+}
