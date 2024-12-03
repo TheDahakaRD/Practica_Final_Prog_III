@@ -1,0 +1,45 @@
+ @page "/agregar-tarea"
+    @inject NavigationManager Navigation
+
+    <PageTitle>Agregar tarea</PageTitle>
+
+    <EditForm Model="@task" OnValidSubmit="HandleAddTask">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="title">Título:</label>
+            <InputText id="title" class="form-control" @bind-Value="task.Title" />
+        </div>
+        <div class="form-group">
+            <label for="description">Descripción:</label>
+            <InputTextArea id="description" class="form-control" @bind-Value="task.Description" />
+        </div>
+        <div class="form-group">
+            <label for="dueDate">Fecha límite:</label>
+            <InputDate id="dueDate" class="form-control" @bind-Value="task.DueDate" />
+        </div>
+        <div class="form-group">
+            <label for="priority">Prioridad:</label>
+            <InputText id="priority" class="form-control" @bind-Value="task.Priority" />
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar tarea</button>
+    </EditForm>
+
+    @code {
+        private TaskModel task = new TaskModel();
+
+        private void HandleAddTask()
+        {
+            // Guardar tarea (en memoria temporalmente)
+            Navigation.NavigateTo("/tareas");
+        }
+
+        public class TaskModel
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public DateTime DueDate { get; set; }
+            public string Priority { get; set; }
+        }
+    }
